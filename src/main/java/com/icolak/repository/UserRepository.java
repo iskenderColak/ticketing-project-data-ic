@@ -11,6 +11,9 @@ import javax.transaction.Transactional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByUserName(String username);
-
+    // if we are writing any query insert, update and delete Spring needs
+    // annotation for derived query @Transactional and for jpql or
+    // native query @Modifying
+    @Transactional
     void deleteByUserName(String username);
 }
