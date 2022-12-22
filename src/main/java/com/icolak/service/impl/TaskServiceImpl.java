@@ -14,17 +14,19 @@ import java.util.stream.Collectors;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
+    private final MapperUtil mapperUtil;
     private final TaskMapper taskMapper;
 
-    public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskServiceImpl(TaskRepository taskRepository, MapperUtil mapperUtil, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
+        this.mapperUtil = mapperUtil;
         this.taskMapper = taskMapper;
     }
 
     @Override
     public List<TaskDTO> listAllTasks() {
         return taskRepository.findAll().stream()
-                .map(taskMapper::convertToDto)
+                .map(task -> mapperUtil.convert(task, new TaskDTO()))
                 .collect(Collectors.toList());
     }
 
