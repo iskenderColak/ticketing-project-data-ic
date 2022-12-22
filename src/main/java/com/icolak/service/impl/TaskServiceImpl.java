@@ -1,12 +1,15 @@
 package com.icolak.service.impl;
 
 import com.icolak.dto.TaskDTO;
+import com.icolak.entity.Task;
+import com.icolak.enums.Status;
 import com.icolak.mapper.MapperUtil;
 import com.icolak.mapper.TaskMapper;
 import com.icolak.repository.TaskRepository;
 import com.icolak.service.TaskService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +40,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void save(TaskDTO task) {
-
+        task.setTaskStatus(Status.OPEN);
+        task.setAssignedDate(LocalDate.now());
+        taskRepository.save(mapperUtil.convert(task, new Task()));
     }
 
     @Override
