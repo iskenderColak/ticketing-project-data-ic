@@ -50,13 +50,27 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDTO update(ProjectDTO project) {
-        return null;
+
+        Project dbProject = projectRepository.findByProjectCode(project.getProjectCode());
+        Project convertedProject = projectMapper.convertToEntity(project);
+        convertedProject.setId(dbProject.getId());
+        convertedProject.setProjectStatus(dbProject.getProjectStatus());
+        projectRepository.save(convertedProject);
+
+        return project;
     }
 
     @Override
     public void delete(String projectCode) {
         Project project = projectRepository.findByProjectCode(projectCode);
         project.setIsDeleted(true);
+        projectRepository.save(project);
+    }
+
+    @Override
+    public void complete(String projectCode) {
+        Project project = projectRepository.findByProjectCode(projectCode);
+        project.setProjectStatus(Status.COMPLETE);
         projectRepository.save(project);
     }
 }
