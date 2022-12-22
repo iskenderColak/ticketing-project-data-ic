@@ -12,6 +12,8 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 public class UserDTO {
 
+    // If there is no id field here we can't save the project that we create,
+    // because the id for assigned manager is going to be null.
     private Long id;
 
     public Long getId() {
