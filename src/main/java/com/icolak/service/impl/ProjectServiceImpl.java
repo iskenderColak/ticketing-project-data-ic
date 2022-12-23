@@ -81,6 +81,8 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectCode(project.getProjectCode() + "-" + project.getId()); // SP00-1
 
         projectRepository.save(project);
+
+        taskService.deleteByProject(projectMapper.convertToDto(project));
     }
 
     @Override

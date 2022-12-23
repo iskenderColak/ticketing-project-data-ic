@@ -1,6 +1,8 @@
 package com.icolak.service.impl;
 
+import com.icolak.dto.ProjectDTO;
 import com.icolak.dto.TaskDTO;
+import com.icolak.entity.Project;
 import com.icolak.entity.Task;
 import com.icolak.enums.Status;
 import com.icolak.mapper.MapperUtil;
@@ -82,5 +84,12 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public int totalCompletedTask(String projectCode) {
         return taskRepository.totalCompletedTasks(projectCode);
+    }
+
+    @Override
+    public void deleteByProject(ProjectDTO projectDTO) {
+        Project project = mapperUtil.convert(projectDTO, new Project());
+        List<Task> tasks = taskRepository.findAllByProject(project);
+        tasks.forEach(task -> delete(task.getId()));
     }
 }

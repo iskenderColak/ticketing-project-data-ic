@@ -1,5 +1,6 @@
 package com.icolak.service;
 
+import com.icolak.dto.ProjectDTO;
 import com.icolak.dto.TaskDTO;
 import com.icolak.enums.Status;
 
@@ -14,4 +15,5 @@ public interface TaskService {
     void delete(Long id);
     int totalNonCompletedTask(String projectCode);
     int totalCompletedTask(String projectCode);
+    void deleteByProject(ProjectDTO projectDTO);
 }
