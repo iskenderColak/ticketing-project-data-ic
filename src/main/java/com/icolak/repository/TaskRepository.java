@@ -1,7 +1,9 @@
 package com.icolak.repository;
 
+import com.icolak.dto.TaskDTO;
 import com.icolak.entity.Project;
 import com.icolak.entity.Task;
+import com.icolak.entity.User;
 import com.icolak.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +23,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findAllByProject(Project project);
 
+    List<Task> findAllByTaskStatusIsNotAndAssignedEmployee(Status status, User assignedEmployee);
+
+    List<Task> findAllByTaskStatusAndAssignedEmployee(Status status, User assignedEmployee);
 }
