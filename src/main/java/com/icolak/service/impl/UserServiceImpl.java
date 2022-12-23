@@ -1,10 +1,15 @@
 package com.icolak.service.impl;
 
+import com.icolak.dto.ProjectDTO;
+import com.icolak.dto.TaskDTO;
 import com.icolak.dto.UserDTO;
 import com.icolak.entity.User;
 import com.icolak.mapper.UserMapper;
 import com.icolak.repository.UserRepository;
+import com.icolak.service.ProjectService;
+import com.icolak.service.TaskService;
 import com.icolak.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +21,17 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final ProjectService projectService;
+    private final TaskService taskService;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy ProjectService projectService, @Lazy TaskService taskService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.projectService = projectService;
+        this.taskService = taskService;
     }
 /*
-    // This method lists only the users whose isDeleted field is false
+    // This below method lists only the users whose isDeleted field is false
     //Instead of this method we use @Where(clause = "is_deleted=false") annotation
     at the top of entity class which is covering all the queries in the repository
     working with that entity
@@ -79,14 +88,34 @@ public class UserServiceImpl implements UserService {
     //By @Where annotation at the top of the User entity we can remove the user from the UI
     @Override
     public void delete(String username) {
+
         User dbUser = userRepository.findByUserName(username);
-        dbUser.setIsDeleted(true);
-        userRepository.save(dbUser);
+
+        if (checkIfUserCanBeDeleted(dbUser)) {
+            dbUser.setIsDeleted(true);
+            userRepository.save(dbUser);
+        }
     }
 
     @Override
     public List<UserDTO> listAllUsersByRole(String description) {
         List<User> users = userRepository.findAllByRoleDescriptionIgnoreCase(description);
         return users.stream().map(userMapper::convertToDto).collect(Collectors.toList());
+    }
+
+    private boolean checkIfUserCanBeDeleted(User user) {
+
+        switch(user.getRole().getDescription()) {
+            case "Manager":
+                List<ProjectDTO> projectDTOList = projectService
+                        .listAllNonCompletedByAssignedManager(userMapper.convertToDto(user));
+                return projectDTOList.size() == 0;
+            case "Employee":
+                List<TaskDTO> taskDTOList = taskService
+                        .listAllNonCompletedByAssignedEmployee(userMapper.convertToDto(user));
+                return taskDTOList.size() == 0;
+            default:
+                return true;
+        }
     }
 }
