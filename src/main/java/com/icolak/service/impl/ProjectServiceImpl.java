@@ -1,11 +1,16 @@
 package com.icolak.service.impl;
 
 import com.icolak.dto.ProjectDTO;
+import com.icolak.dto.UserDTO;
 import com.icolak.entity.Project;
+import com.icolak.entity.User;
 import com.icolak.enums.Status;
+import com.icolak.mapper.MapperUtil;
 import com.icolak.mapper.ProjectMapper;
 import com.icolak.repository.ProjectRepository;
 import com.icolak.service.ProjectService;
+import com.icolak.service.TaskService;
+import com.icolak.service.UserService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +22,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final MapperUtil mapperUtil;
+    private final UserService userService;
+    private final TaskService taskService;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, ProjectMapper projectMapper) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, ProjectMapper projectMapper, MapperUtil mapperUtil, UserService userService, TaskService taskService) {
         this.projectRepository = projectRepository;
+        this.mapperUtil = mapperUtil;
         this.projectMapper = projectMapper;
+        this.userService = userService;
+        this.taskService = taskService;
     }
 
     @Override
@@ -72,5 +83,22 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findByProjectCode(projectCode);
         project.setProjectStatus(Status.COMPLETE);
         projectRepository.save(project);
+    }
+
+    @Override
+    public List<ProjectDTO> listAllProjectDetails() {
+        UserDTO currentUserDTO = userService.findByUserName("harold@manager.com"); // login manager
+        User user = mapperUtil.convert(currentUserDTO, new User());
+        // We bring all the projects belong to log in manager
+        List<Project> projectList = projectRepository.findAllByAssignedManager(user);
+
+        return projectList.stream().map(project -> {
+            ProjectDTO projectDTO = mapperUtil.convert(project, new ProjectDTO());
+            projectDTO.setUnfinishedTaskCounts(taskService.totalNonCompletedTask(project.getProjectCode()));
+            projectDTO.setCompleteTaskCounts(taskService.totalCompletedTask(project.getProjectCode()));
+
+            return projectDTO;
+            }
+        ).collect(Collectors.toList());
     }
 }
