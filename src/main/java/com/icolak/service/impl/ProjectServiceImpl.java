@@ -75,6 +75,11 @@ public class ProjectServiceImpl implements ProjectService {
     public void delete(String projectCode) {
         Project project = projectRepository.findByProjectCode(projectCode);
         project.setIsDeleted(true);
+        // After we delete a project we change the project code
+        // to be able to create a new project with the same project code
+        // For example we can do like that, it depends on you
+        project.setProjectCode(project.getProjectCode() + "-" + project.getId()); // SP00-1
+
         projectRepository.save(project);
     }
 
