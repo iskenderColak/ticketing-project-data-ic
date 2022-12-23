@@ -81,7 +81,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectCode(project.getProjectCode() + "-" + project.getId()); // SP00-1
 
         projectRepository.save(project);
-
+        // When we delete a project, we delete all the tasks related to that project
         taskService.deleteByProject(projectMapper.convertToDto(project));
     }
 
@@ -90,6 +90,8 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findByProjectCode(projectCode);
         project.setProjectStatus(Status.COMPLETE);
         projectRepository.save(project);
+        // When we complete a project, we complete all the tasks related to that project
+        taskService.completeByProject(projectMapper.convertToDto(project));
     }
 
     @Override

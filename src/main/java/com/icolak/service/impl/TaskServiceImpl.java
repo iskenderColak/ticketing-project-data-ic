@@ -58,7 +58,7 @@ public class TaskServiceImpl implements TaskService {
         Optional<Task> dbTask = taskRepository.findById(dto.getId());
         Task convertedTask = mapperUtil.convert(dto, new Task());
         if (dbTask.isPresent()) {
-            convertedTask.setTaskStatus(dbTask.get().getTaskStatus());
+            convertedTask.setTaskStatus(dto.getTaskStatus() == null ? dbTask.get().getTaskStatus() : dto.getTaskStatus());
             convertedTask.setAssignedDate(dbTask.get().getAssignedDate());
             taskRepository.save(convertedTask);
         }
@@ -91,5 +91,16 @@ public class TaskServiceImpl implements TaskService {
         Project project = mapperUtil.convert(projectDTO, new Project());
         List<Task> tasks = taskRepository.findAllByProject(project);
         tasks.forEach(task -> delete(task.getId()));
+    }
+
+    @Override
+    public void completeByProject(ProjectDTO projectDTO) {
+        Project project = mapperUtil.convert(projectDTO, new Project());
+        List<Task> tasks = taskRepository.findAllByProject(project);
+        tasks.stream().map(task -> mapperUtil.convert(task, new TaskDTO()))
+                .forEach(taskDTO -> {
+                    taskDTO.setTaskStatus(Status.COMPLETE);
+                    update(taskDTO);
+                });
     }
 }
